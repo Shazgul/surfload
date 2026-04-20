@@ -292,3 +292,15 @@ setup.cfg
 ## Git-Workflow
 
 Branch- und Commit-Richtlinien stehen in `CONTRIBUTING.md`.
+
+Fuer Public-Readiness sind zusaetzlich eingerichtet:
+
+- `LICENSE` (MIT)
+- `CODE_OF_CONDUCT.md`
+- `SECURITY.md`
+- `.github/pull_request_template.md`
+- `.github/ISSUE_TEMPLATE/*`
+- `.github/CODEOWNERS`
+- `.github/workflows/ci.yml` (pytest auf `main`/`develop` + PRs)
+- `.github/dependabot.yml`
+- `.editorconfig` + `.gitattributes`
