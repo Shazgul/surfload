@@ -304,3 +304,12 @@ Fuer Public-Readiness sind zusaetzlich eingerichtet:
 - `.github/workflows/ci.yml` (pytest auf `main`/`develop` + PRs)
 - `.github/dependabot.yml`
 - `.editorconfig` + `.gitattributes`
+
+Branch-Protection kann per Script gesetzt werden:
+
+```powershell
+pwsh ./scripts/apply_github_protection.ps1 -Repo Shazgul/surfload
+```
+
+Hinweis: Auf GitHub Free ist Branch-Protection fuer private Repos eingeschraenkt.
+Sobald das Repo public ist (oder mit passendem Plan), kann das Script vollstaendig greifen.
