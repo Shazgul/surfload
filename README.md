@@ -288,3 +288,7 @@ tests/
 pyproject.toml
 setup.cfg
 ```
+
+## Git-Workflow
+
+Branch- und Commit-Richtlinien stehen in `CONTRIBUTING.md`.
