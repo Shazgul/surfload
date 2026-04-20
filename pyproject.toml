@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "surfload"
+version = "0.1.0"
+description = "Anfaengerfreundliches CLI-Tool fuer parallele Multi-Hoster-Uploads"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Surfload Contributors" }
+]
+dependencies = [
+  "requests>=2.31.0",
+  "urllib3>=2.0.0",
+  "tqdm>=4.66.0",
+  "cryptography>=42.0.0",
+  "PyYAML>=6.0.0"
+]
+
+[project.optional-dependencies]
+sevenzip = ["py7zr>=0.22.0"]
+keyring = ["keyring>=25.0.0"]
+dev = [
+  "pytest>=8.0.0",
+  "pytest-cov>=5.0.0"
+]
+
+[project.scripts]
+surfload = "surfload.cli:main"
+surf = "surfload.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["surfload*"]
