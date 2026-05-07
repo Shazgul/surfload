@@ -50,11 +50,11 @@ class GofilePlugin(BaseHostPlugin):
         return 0
 
     def _resolve_upload_url(self) -> str:
-        configured = str(self.host_config.get("upload_url", "")).strip()
+        configured = str(self.host_config.get("upload_url", "https://upload.gofile.io/uploadfile")).strip()
         if configured:
             return configured
 
-        server_api_url = str(self.host_config.get("server_api_url", "https://api.gofile.io/getServer")).strip()
+        server_api_url = str(self.host_config.get("server_api_url", "https://api.gofile.io/servers")).strip()
         response = self._request("GET", server_api_url)
         if response.status_code >= 400:
             raise UploadError(f"gofile server discovery failed ({response.status_code}): {response.text[:300]}")
@@ -81,6 +81,23 @@ class GofilePlugin(BaseHostPlugin):
 
     @staticmethod
     def _extract_server(payload: Dict[str, Any]) -> Optional[str]:
+        if isinstance(payload.get("data"), dict):
+            data = payload["data"]
+            if isinstance(data.get("server"), dict):
+                server_info = data["server"]
+                for key in ("url", "uploadUrl"):
+                    value = server_info.get(key)
+                    if isinstance(value, str) and value:
+                        return value.strip()
+
+            if isinstance(data.get("servers"), list) and data["servers"]:
+                first = data["servers"][0]
+                if isinstance(first, dict):
+                    for key in ("url", "uploadUrl"):
+                        value = first.get(key)
+                        if isinstance(value, str) and value:
+                            return value.strip()
+
         data = payload.get("data")
         if isinstance(data, dict):
             server = data.get("server")
