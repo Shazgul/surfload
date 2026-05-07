@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
@@ -20,6 +21,7 @@ class UploadResult:
     host: str
     file_path: str
     success: bool
+    file_size_bytes: int = 0
     download_url: Optional[str] = None
     error: Optional[str] = None
     raw_response: Any = None
@@ -227,6 +229,7 @@ class UploadManager:
                         host=task.host,
                         file_path=str(task.file_path),
                         success=True,
+                        file_size_bytes=file_size,
                         download_url=plugin_result.download_url,
                         raw_response=plugin_result.raw_response,
                         attempts=attempt,
@@ -267,6 +270,7 @@ class UploadManager:
             host=task.host,
             file_path=str(task.file_path),
             success=False,
+            file_size_bytes=file_size,
             error=message,
             attempts=attempts_done,
             duration_seconds=round(time.monotonic() - started_ts, 3),
@@ -350,15 +354,109 @@ class UploadManager:
         lines.append(f"generated: {datetime.now(timezone.utc).isoformat()}")
         lines.append("")
 
-        for item in results:
+        sorted_results = sorted(
+            results,
+            key=lambda item: (
+                item.host,
+                UploadManager._natural_sort_key(Path(item.file_path).name),
+                item.file_path,
+            ),
+        )
+
+        grouped: list[list[UploadResult]] = []
+        current_group: list[UploadResult] = []
+        current_host = ""
+        current_base: str | None = None
+
+        for item in sorted_results:
             file_name = Path(item.file_path).name
-            if item.success:
-                lines.append(f"OK  [{item.host}] {file_name}")
-                lines.append(f"    {item.download_url}")
+            base_name, _part_number, _part_width = UploadManager._split_part_suffix(file_name)
+            group_base = base_name if _part_number is not None else file_name
+
+            if not current_group or item.host != current_host or group_base != current_base:
+                if current_group:
+                    grouped.append(current_group)
+                current_group = [item]
+                current_host = item.host
+                current_base = group_base
             else:
-                lines.append(f"ERR [{item.host}] {file_name}")
-                lines.append(f"    {item.error}")
+                current_group.append(item)
+
+        if current_group:
+            grouped.append(current_group)
+
+        for group in grouped:
+            host = group[0].host
+            file_names = [Path(item.file_path).name for item in group]
+            header_label = UploadManager._format_group_header(file_names)
+            lines.append(f"[{host}] {header_label}")
+
+            for item in group:
+                size_label = UploadManager._format_size_label(item.file_size_bytes)
+                if item.success and item.download_url:
+                    lines.append(f"{item.download_url}  - {size_label}")
+                else:
+                    file_name = Path(item.file_path).name
+                    lines.append(f"ERROR {file_name}: {item.error or 'Unknown upload error'}  - {size_label}")
             lines.append("")
 
         target.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
         return target
+
+    @staticmethod
+    def _natural_sort_key(text: str) -> tuple[tuple[int, Any], ...]:
+        parts = re.split(r"(\d+)", text.lower())
+        key: list[tuple[int, Any]] = []
+        for part in parts:
+            if not part:
+                continue
+            if part.isdigit():
+                key.append((0, int(part)))
+            else:
+                key.append((1, part))
+        return tuple(key)
+
+    @staticmethod
+    def _split_part_suffix(file_name: str) -> tuple[str, int | None, int]:
+        match = re.match(r"^(.*)\.(\d+)$", file_name)
+        if not match:
+            return file_name, None, 0
+        part_text = match.group(2)
+        return match.group(1), int(part_text), len(part_text)
+
+    @staticmethod
+    def _format_group_header(file_names: list[str]) -> str:
+        if not file_names:
+            return ""
+
+        parsed = [UploadManager._split_part_suffix(name) for name in file_names]
+        if all(part is not None for _, part, _ in parsed):
+            base_name = parsed[0][0]
+            if all(base == base_name for base, _, _ in parsed):
+                part_numbers = sorted(int(part or 0) for _, part, _ in parsed)
+                width = max((width for _, _, width in parsed), default=1)
+                first_part = str(part_numbers[0]).zfill(width)
+                last_part = str(part_numbers[-1]).zfill(width)
+                if first_part == last_part:
+                    return f"{base_name}.{first_part}"
+                return f"{base_name}.{first_part}-{last_part}"
+
+        return file_names[0]
+
+    @staticmethod
+    def _format_size_label(size_bytes: int) -> str:
+        size = max(0, int(size_bytes or 0))
+        gib = 1024 * 1024 * 1024
+        mib = 1024 * 1024
+        kib = 1024
+
+        if size >= gib:
+            value = size / gib
+            return f"{value:.2f}".replace(".", ",") + " GB"
+        if size >= mib:
+            value = size / mib
+            return f"{value:.2f}".replace(".", ",") + " MB"
+        if size >= kib:
+            value = size / kib
+            return f"{value:.2f}".replace(".", ",") + " KB"
+        return f"{size} B"
