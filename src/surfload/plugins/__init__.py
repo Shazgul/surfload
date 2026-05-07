@@ -9,6 +9,7 @@ from .base import BaseHostPlugin
 from .catbox import CatboxPlugin
 from .dailyuploads import DailyUploadsPlugin
 from .dummy_local import DummyLocalPlugin
+from .fileq import FileQPlugin
 from .gofile import GofilePlugin
 from .megaup import MegaupPlugin
 from .send_now import SendNowPlugin
@@ -133,6 +134,11 @@ PLUGIN_REGISTRY: Dict[str, PluginDescriptor] = {
         key=DailyUploadsPlugin.host_key,
         cls=DailyUploadsPlugin,
         domain=DailyUploadsPlugin.domain,
+    ),
+    FileQPlugin.host_key: PluginDescriptor(
+        key=FileQPlugin.host_key,
+        cls=FileQPlugin,
+        domain=FileQPlugin.domain,
     ),
     MegaupPlugin.host_key: PluginDescriptor(
         key=MegaupPlugin.host_key,

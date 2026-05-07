@@ -42,11 +42,20 @@ source ~/surfload/.venv/bin/activate
 surfload list
 ```
 
+## 3b) Interaktives Menue (empfohlen)
+
+```bash
+source ~/surfload/.venv/bin/activate
+surfload ui
+# alternativ: surfload wizard
+```
+
 ## 4) Accounts hinterlegen (falls benoetigt)
 
 ```bash
 source ~/surfload/.venv/bin/activate
 surfload account add dailyuploads --interactive
+surfload account add fileq --interactive
 surfload account add gofile --interactive
 surfload account add megaup --interactive
 surfload account add send_now --interactive
@@ -57,7 +66,7 @@ surfload account add upload_ee --interactive
 
 ```bash
 source ~/surfload/.venv/bin/activate
-surfload upload --host catbox,dailyuploads,gofile,megaup,send_now,tmpfiles_org,upload_ee /pfad/datei.bin --parallel 3 --no-progress
+surfload upload --host catbox,dailyuploads,fileq,gofile,megaup,send_now,tmpfiles_org,upload_ee /pfad/datei.bin --parallel 3 --no-progress
 ```
 
 ## 6) Realtest mit Split-Archiv + TXT/JSON Export
@@ -65,7 +74,7 @@ surfload upload --host catbox,dailyuploads,gofile,megaup,send_now,tmpfiles_org,u
 ```bash
 source ~/surfload/.venv/bin/activate
 surfload upload \
-  --host catbox,dailyuploads,gofile,megaup,send_now,tmpfiles_org,upload_ee \
+  --host catbox,dailyuploads,fileq,gofile,megaup,send_now,tmpfiles_org,upload_ee \
   /pfad/datei.bin \
   --compress 7z \
   --archive-name release_test \

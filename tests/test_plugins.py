@@ -9,6 +9,7 @@ from surfload.plugins.base import BaseHostPlugin, UploadError
 from surfload.plugins.catbox import CatboxPlugin
 from surfload.plugins.dailyuploads import DailyUploadsPlugin
 from surfload.plugins.dummy_local import DummyLocalPlugin
+from surfload.plugins.fileq import FileQPlugin
 from surfload.plugins.gofile import GofilePlugin
 from surfload.plugins.megaup import MegaupPlugin
 from surfload.plugins.send_now import SendNowPlugin
@@ -37,6 +38,7 @@ def test_plugin_registry_contains_extended_plugins() -> None:
     assert "catbox" in registry
     assert "tmpfiles_org" in registry
     assert "dailyuploads" in registry
+    assert "fileq" in registry
     assert "megaup" in registry
     assert "gofile" in registry
     assert "send_now" in registry
@@ -171,6 +173,13 @@ def test_dailyuploads_finalize_builds_default_link_from_id() -> None:
     response = {"data": {"id": "daily123"}}
     result = plugin.finalize(response, metadata={})
     assert result == "https://dailyuploads.net/daily123"
+
+
+def test_fileq_finalize_builds_default_link_from_upload_array() -> None:
+    plugin = FileQPlugin()
+    response = [{"file_code": "b578rni0e1ka", "file_status": "OK"}]
+    result = plugin.finalize(response, metadata={})
+    assert result == "https://fileq.net/b578rni0e1ka"
 
 
 def test_megaup_finalize_builds_default_link_from_id() -> None:

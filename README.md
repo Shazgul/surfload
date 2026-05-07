@@ -26,6 +26,7 @@ Aktuell enthalten:
 - `catbox` (real)
 - `tmpfiles_org` (real)
 - `dailyuploads` (real, dailyuploads.net)
+- `fileq` (real, fileq.net)
 - `megaup` (real, megaup.net)
 - `gofile` (real, gofile.io)
 - `send_now` (real, send.now)
@@ -66,10 +67,19 @@ pip install -e .[sevenzip,keyring,dev]
 surfload list
 ```
 
+### Interaktives Menue (ohne lange Befehle)
+
+```bash
+surfload ui
+# oder
+surfload wizard
+```
+
 ### Account anlegen (interaktiv)
 
 ```bash
 surfload account add dailyuploads --interactive
+surfload account add fileq --interactive
 surfload account add gofile --interactive
 surfload account add megaup --interactive
 ```
@@ -77,7 +87,7 @@ surfload account add megaup --interactive
 ### Upload (mehrere Hoster parallel)
 
 ```bash
-surfload upload --host gofile,megaup /pfad/datei.iso --parallel 3
+surfload upload --host gofile,fileq,megaup /pfad/datei.iso --parallel 3
 ```
 
 ### Upload mit Kompression
@@ -163,6 +173,19 @@ surfload config set KEY VALUE
 surfload demo --port 8765
 ```
 
+### `ui` / `wizard`
+
+```bash
+surfload ui
+```
+
+Startet einen interaktiven Assistenten fuer:
+
+- Hoster anzeigen
+- Account hinzufuegen
+- Accounts anzeigen
+- Upload starten (inkl. Kompression/Export-Abfragen)
+
 ## Beispielkonfiguration
 
 Siehe `config.example.yaml`.
@@ -176,7 +199,7 @@ Runtime-Config liegt standardmaessig unter:
 Das Projekt nutzt PolyUploader-Muster als Vorlage fuer Host-Implementierungen (insb. Form-Felder und Endpunkte):
 
 - **Neue Multipart-Hoster**:
-  - `gofile.io`, `send.now`, `upload.ee`, `dailyuploads.net`, `megaup.net`
+  - `gofile.io`, `send.now`, `upload.ee`, `dailyuploads.net`, `fileq.net`, `megaup.net`
   - Endpunkte/Feldnamen sind per `host_defaults` konfigurierbar, damit API-Aenderungen leicht angepasst werden koennen.
 
 ## Plugin-API
@@ -250,6 +273,7 @@ src/surfload/
     catbox.py
     tmpfiles_org.py
     dailyuploads.py
+    fileq.py
     megaup.py
     gofile.py
     send_now.py

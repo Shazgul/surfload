@@ -25,6 +25,8 @@ HOST_ALIASES = {
     "tmpfiles_org": "tmpfiles_org",
     "dailyuploads.net": "dailyuploads",
     "dailyuploads": "dailyuploads",
+    "fileq.net": "fileq",
+    "fileq": "fileq",
     "megaup.net": "megaup",
     "megaup": "megaup",
     "gofile.io": "gofile",
@@ -487,6 +489,145 @@ def cmd_demo(args) -> int:
         server.server_close()
 
 
+def _prompt_yes_no(prompt: str, default: bool = False) -> bool:
+    suffix = "Y/n" if default else "y/N"
+    raw = input(f"{prompt} [{suffix}]: ").strip().lower()
+    if not raw:
+        return default
+    return raw in {"y", "yes", "j", "ja"}
+
+
+def _prompt_int(prompt: str, default: int) -> int:
+    raw = input(f"{prompt} [{default}]: ").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        print("Ungueltige Zahl, nutze Default.")
+        return default
+
+
+def cmd_wizard(args) -> int:
+    print("Surfload Wizard")
+    print("Interaktives Menue fuer Account-Setup und Uploads.\n")
+
+    while True:
+        print("Bitte waehlen:")
+        print("  1) Hoster anzeigen")
+        print("  2) Account hinzufuegen")
+        print("  3) Accounts anzeigen")
+        print("  4) Upload starten")
+        print("  5) Beenden")
+
+        choice = input("Auswahl [1-5]: ").strip()
+
+        if choice == "1":
+            cmd_list(args)
+            print("")
+            continue
+
+        if choice == "2":
+            host = _normalize_host_key(input("Host (z.B. fileq, gofile): ").strip())
+            if not host:
+                print("Host fehlt.\n")
+                continue
+
+            account_name = input("Account-Name [default]: ").strip() or "default"
+            interactive = _prompt_yes_no("Felder interaktiv eingeben?", default=True)
+
+            account_args = argparse.Namespace(
+                config=args.config,
+                credential_backend=args.credential_backend,
+                master_password=args.master_password,
+                host=host,
+                name=account_name,
+                field=[],
+                interactive=interactive,
+            )
+            try:
+                cmd_account_add(account_args)
+            except Exception as exc:  # noqa: BLE001
+                print(f"Fehler beim Account-Setup: {exc}")
+            print("")
+            continue
+
+        if choice == "3":
+            host_filter = _normalize_host_key(input("Optional Host (leer = alle): ").strip())
+            list_args = argparse.Namespace(
+                config=args.config,
+                credential_backend=args.credential_backend,
+                master_password=args.master_password,
+                host=host_filter,
+            )
+            cmd_account_list(list_args)
+            print("")
+            continue
+
+        if choice == "4":
+            raw_paths = input("Datei/Ordner-Pfade (comma-separated): ").strip()
+            if not raw_paths:
+                print("Keine Pfade angegeben.\n")
+                continue
+            paths = [part.strip() for part in raw_paths.split(",") if part.strip()]
+
+            raw_hosts = input("Hosts (z.B. fileq,gofile) - leer fuer Host-Auswahl: ").strip()
+            host_args = [raw_hosts] if raw_hosts else []
+
+            compress = input("Kompression [none/auto/zip/7z] (default none): ").strip().lower() or "none"
+            if compress not in {"none", "auto", "zip", "7z"}:
+                print("Ungueltige Kompression, nutze none.")
+                compress = "none"
+
+            archive_name = ""
+            archive_part_size = ""
+            if compress in {"zip", "7z", "auto"}:
+                archive_name = input("Archiv-Name (optional): ").strip()
+                archive_part_size = input("Part-Groesse (optional, z.B. 1GB): ").strip()
+
+            parallel_default = int(load_config(Path(args.config) if args.config else DEFAULT_CONFIG_PATH).get("parallelism", 3))
+            parallel = _prompt_int("Parallel-Uploads", parallel_default)
+            no_progress = _prompt_yes_no("Progress deaktivieren?", default=True)
+
+            export_path = input("TXT Export-Pfad (optional): ").strip()
+            json_path = input("JSON Export-Pfad (optional): ").strip()
+
+            upload_args = argparse.Namespace(
+                config=args.config,
+                credential_backend=args.credential_backend,
+                master_password=args.master_password,
+                paths=paths,
+                host=host_args,
+                account=[],
+                parallel=parallel,
+                chunk_size=0,
+                retries=0,
+                compress=compress,
+                archive_name=archive_name,
+                archive_password="",
+                archive_password_prompt=False,
+                archive_part_size=archive_part_size,
+                recursive=True,
+                json=False,
+                json_file=json_path,
+                export=export_path,
+                no_progress=no_progress,
+                resume_on_retry=None,
+            )
+            try:
+                cmd_upload(upload_args)
+            except Exception as exc:  # noqa: BLE001
+                print(f"Upload fehlgeschlagen: {exc}")
+            print("")
+            continue
+
+        if choice == "5":
+            print("Wizard beendet.")
+            return 0
+
+        print("Ungueltige Auswahl.\n")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="surfload",
@@ -588,6 +729,12 @@ def build_parser() -> argparse.ArgumentParser:
     demo.add_argument("--port", type=int, default=8765)
     demo.add_argument("--no-progress", action="store_true")
     demo.set_defaults(func=cmd_demo)
+
+    wizard = sub.add_parser("wizard", help="Interaktiver Assistent (Menue)")
+    wizard.set_defaults(func=cmd_wizard)
+
+    ui = sub.add_parser("ui", help="Alias fuer wizard")
+    ui.set_defaults(func=cmd_wizard)
 
     return parser
 

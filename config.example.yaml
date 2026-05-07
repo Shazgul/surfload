@@ -20,6 +20,11 @@ host_defaults:
     upload_url: ""
     server_url: https://dailyuploads.net/server
 
+  fileq:
+    api_base: https://fileq.net/api
+    utype: prem
+    folder_id: ""
+
   megaup:
     bootstrap_url: https://megaup.net/
     file_field: files[]
