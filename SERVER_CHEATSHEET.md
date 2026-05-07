@@ -2,11 +2,18 @@
 
 Kurzreferenz fuer Ubuntu/Debian-Server.
 
+> Hinweis: Surfload benoetigt **Python >= 3.10**.
+
 ## 1) Einmalige Installation
 
 ```bash
 sudo apt update
 sudo apt install -y git python3 python3-pip python3-venv zip p7zip-full
+
+# Falls `python3 --version` < 3.10 ist, zusaetzlich 3.10/3.11 installieren:
+sudo apt install -y python3.10 python3.10-venv python3.10-distutils
+# alternativ (wenn verfuegbar):
+# sudo apt install -y python3.11 python3.11-venv
 
 # Repo klonen
 # (URL ggf. anpassen)
@@ -14,8 +21,9 @@ git clone https://github.com/Shazgul/surfload.git
 cd surfload
 
 # venv + Installation
-python3 -m venv .venv
+python3.10 -m venv .venv  # oder python3.11 -m venv .venv
 source .venv/bin/activate
+python --version          # sollte >= 3.10 sein
 pip install -U pip
 pip install -e .
 ```
