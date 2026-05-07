@@ -6,27 +6,21 @@ from dataclasses import dataclass
 from typing import Dict, List, Type
 
 from .base import BaseHostPlugin
-from .buzzheavier import BuzzheavierPlugin
 from .catbox import CatboxPlugin
+from .dailyuploads import DailyUploadsPlugin
 from .dummy_local import DummyLocalPlugin
-from .fileio import FileIoPlugin
 from .gofile import GofilePlugin
-from .onefichier import OneFichierPlugin
+from .megaup import MegaupPlugin
 from .send_now import SendNowPlugin
 from .tmpfiles_org import TmpfilesOrgPlugin
-from .transfer_sh import TransferShPlugin
 from .upload_ee import UploadEePlugin
-from .vikingfile import VikingfilePlugin
 
 
 PROFILE_CAPABILITIES = {
     "size_10gb_plus": {
-        "1fichier.com",
         "bowfile.com",
         "gofile.io",
         "hitfile.net",
-        "buzzheavier.com",
-        "vikingfile.com",
         "dailyuploads.net",
         "send.now",
         "uploadhive.com",
@@ -70,10 +64,8 @@ PROFILE_CAPABILITIES = {
         "filetmp.com",
     },
     "manual_delete": {
-        "1fichier.com",
         "bowfile.com",
         "gofile.io",
-        "1cloudfile.com",
         "upload.ee",
         "mexa.sh",
         "filespace.com",
@@ -93,7 +85,6 @@ PROFILE_CAPABILITIES = {
         "filestore.to",
         "end2end.tech",
         "1filesharing.com",
-        "mega4upload.net",
         "hostuje.net",
         "dz4up.com",
         "wdfiles.ru",
@@ -128,16 +119,6 @@ class PluginDescriptor:
 
 
 PLUGIN_REGISTRY: Dict[str, PluginDescriptor] = {
-    TransferShPlugin.host_key: PluginDescriptor(
-        key=TransferShPlugin.host_key,
-        cls=TransferShPlugin,
-        domain=TransferShPlugin.domain,
-    ),
-    FileIoPlugin.host_key: PluginDescriptor(
-        key=FileIoPlugin.host_key,
-        cls=FileIoPlugin,
-        domain=FileIoPlugin.domain,
-    ),
     CatboxPlugin.host_key: PluginDescriptor(
         key=CatboxPlugin.host_key,
         cls=CatboxPlugin,
@@ -148,15 +129,15 @@ PLUGIN_REGISTRY: Dict[str, PluginDescriptor] = {
         cls=TmpfilesOrgPlugin,
         domain=TmpfilesOrgPlugin.domain,
     ),
-    BuzzheavierPlugin.host_key: PluginDescriptor(
-        key=BuzzheavierPlugin.host_key,
-        cls=BuzzheavierPlugin,
-        domain=BuzzheavierPlugin.domain,
+    DailyUploadsPlugin.host_key: PluginDescriptor(
+        key=DailyUploadsPlugin.host_key,
+        cls=DailyUploadsPlugin,
+        domain=DailyUploadsPlugin.domain,
     ),
-    OneFichierPlugin.host_key: PluginDescriptor(
-        key=OneFichierPlugin.host_key,
-        cls=OneFichierPlugin,
-        domain=OneFichierPlugin.domain,
+    MegaupPlugin.host_key: PluginDescriptor(
+        key=MegaupPlugin.host_key,
+        cls=MegaupPlugin,
+        domain=MegaupPlugin.domain,
     ),
     GofilePlugin.host_key: PluginDescriptor(
         key=GofilePlugin.host_key,
@@ -172,11 +153,6 @@ PLUGIN_REGISTRY: Dict[str, PluginDescriptor] = {
         key=UploadEePlugin.host_key,
         cls=UploadEePlugin,
         domain=UploadEePlugin.domain,
-    ),
-    VikingfilePlugin.host_key: PluginDescriptor(
-        key=VikingfilePlugin.host_key,
-        cls=VikingfilePlugin,
-        domain=VikingfilePlugin.domain,
     ),
     DummyLocalPlugin.host_key: PluginDescriptor(
         key=DummyLocalPlugin.host_key,

@@ -24,35 +24,27 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "credential_backend": "file",
     "log_level": "INFO",
     "host_defaults": {
-        "fileio": {
-            "max_downloads": 0,
-            "auto_delete": False,
-        },
         "catbox": {
             "upload_url": "https://catbox.moe/user/api.php",
         },
         "tmpfiles_org": {
             "upload_url": "https://tmpfiles.org/api/v1/upload",
         },
-        "transfer_sh": {
-            "max_days": 14,
-            "max_downloads": 0,
-            "enable_resume": False,
-        },
-        "buzzheavier": {
-            "upload_base_url": "https://w.buzzheavier.com",
-            "parent_id": "",
-            "location_id": "",
-            "note": "",
-            "enable_resume": False,
-        },
-        "onefichier": {
+        "dailyuploads": {
             "upload_url": "",
-            "upload_server_url": "https://api.1fichier.com/v1/upload/get_upload_server.cgi",
+            "server_url": "https://dailyuploads.net/server",
+        },
+        "megaup": {
+            "bootstrap_url": "https://megaup.net/",
+            "file_field": "files[]",
+            "token_field": "token",
+            "use_bearer_auth": False,
+            "max_chunk_size": 100000000,
+            "folder_id": "",
         },
         "gofile": {
-            "upload_url": "",
-            "server_api_url": "https://api.gofile.io/getServer",
+            "upload_url": "https://upload.gofile.io/uploadfile",
+            "server_api_url": "https://api.gofile.io/servers",
             "upload_path": "/uploadFile",
             "folder_id": "",
             "use_bearer_auth": False,
@@ -60,23 +52,13 @@ DEFAULT_CONFIG: Dict[str, Any] = {
             "resume_probe_url_template": "",
         },
         "send_now": {
-            "upload_url": "https://api.send.now/upload",
-            "file_field": "file",
-            "token_field": "",
-            "use_bearer_auth": True,
+            "upload_url": "",
+            "homepage_url": "https://send.now/",
         },
         "upload_ee": {
-            "upload_url": "https://upload.ee/upload_api.php",
-            "file_field": "file",
-            "token_field": "token",
-            "use_bearer_auth": False,
-        },
-        "vikingfile": {
-            "upload_url": "",
-            "server_api_url": "https://vikingfile.com/api/get-server",
-            "file_field": "file",
-            "user_field": "user",
-            "use_bearer_auth": False,
+            "bootstrap_url": "",
+            "upload_url_template": "https://www.upload.ee/cgi-bin/ubr_upload.pl?X-Progress-ID={upload_id}&upload_id={upload_id}",
+            "finished_url_template": "https://www.upload.ee/?page=finishedsimple&upload_id={upload_id}",
         },
     },
 }

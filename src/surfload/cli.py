@@ -19,27 +19,20 @@ from .utils.logger import build_logger
 
 
 HOST_ALIASES = {
-    "transfer.sh": "transfer_sh",
-    "transfer_sh": "transfer_sh",
-    "file.io": "fileio",
-    "fileio": "fileio",
     "catbox.moe": "catbox",
     "catbox": "catbox",
     "tmpfiles.org": "tmpfiles_org",
     "tmpfiles_org": "tmpfiles_org",
-    "buzzheavier.com": "buzzheavier",
-    "buzzheavier": "buzzheavier",
-    "1fichier.com": "onefichier",
-    "1fichier": "onefichier",
-    "onefichier": "onefichier",
+    "dailyuploads.net": "dailyuploads",
+    "dailyuploads": "dailyuploads",
+    "megaup.net": "megaup",
+    "megaup": "megaup",
     "gofile.io": "gofile",
     "gofile": "gofile",
     "send.now": "send_now",
     "send_now": "send_now",
     "upload.ee": "upload_ee",
     "upload_ee": "upload_ee",
-    "vikingfile.com": "vikingfile",
-    "vikingfile": "vikingfile",
     "dummy-local": "dummy_local",
     "dummy_local": "dummy_local",
 }
@@ -74,7 +67,7 @@ def _interactive_host_selection(manager: UploadManager) -> List[str]:
         tags = ", ".join(descriptor.capability_tags) if descriptor.capability_tags else "-"
         print(f"  {index}) {descriptor.key:<12} [{tags}]")
 
-    raw = input("Hoster auswaehlen (z.B. 1,3 oder fileio,transfer_sh): ").strip()
+    raw = input("Hoster auswaehlen (z.B. 1,3 oder gofile,megaup): ").strip()
     if not raw:
         raise SystemExit("Keine Hoster ausgewaehlt.")
 
@@ -512,7 +505,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     upload = sub.add_parser("upload", help="Dateien/Ordner hochladen")
     upload.add_argument("paths", nargs="+", help="Datei- oder Ordnerpfade")
-    upload.add_argument("--host", action="append", help="Hostliste, z.B. fileio,transfer.sh")
+    upload.add_argument("--host", action="append", help="Hostliste, z.B. gofile,megaup")
     upload.add_argument("--account", action="append", help="Host-Account-Mapping host:name")
     upload.add_argument("--parallel", type=int, default=0, help="Parallele Upload-Worker")
     upload.add_argument("--chunk-size", type=int, default=0, help="Chunk-Groesse in Bytes")

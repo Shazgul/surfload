@@ -11,6 +11,7 @@ from urllib.parse import unquote
 import pytest
 
 from surfload.core import UploadManager
+from surfload.plugins import get_plugin_registry
 from surfload.utils.credentials import CredentialStore
 
 
@@ -553,6 +554,9 @@ def test_buzzheavier_resume_on_retry_uses_content_range(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    if "buzzheavier" not in get_plugin_registry():
+        pytest.skip("buzzheavier plugin removed")
+
     monkeypatch.setattr("surfload.core.time.sleep", lambda _seconds: None)
 
     source = tmp_path / "payload_buzz.bin"
@@ -679,6 +683,9 @@ def test_transfer_sh_resume_on_retry_uses_content_range(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    if "transfer_sh" not in get_plugin_registry():
+        pytest.skip("transfer_sh plugin removed")
+
     monkeypatch.setattr("surfload.core.time.sleep", lambda _seconds: None)
 
     source = tmp_path / "payload_transfer.bin"

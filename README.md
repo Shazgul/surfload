@@ -7,7 +7,7 @@ Anfaengerfreundliches, robustes CLI-Tool fuer Ubuntu/Debian zum parallelen Uploa
 ## Features
 
 - Mehrere Hoster parallel (`--parallel`)
-- Interaktive Hoster-Auswahl oder per CLI (`--host fileio,transfer.sh`)
+- Interaktive Hoster-Auswahl oder per CLI (`--host gofile,megaup`)
 - Plugin-Architektur fuer neue Hoster
 - Sichere Credentials:
   - optional `keyring`
@@ -23,16 +23,13 @@ Anfaengerfreundliches, robustes CLI-Tool fuer Ubuntu/Debian zum parallelen Uploa
 
 Aktuell enthalten:
 
-- `transfer_sh` (real)
-- `fileio` (real)
 - `catbox` (real)
 - `tmpfiles_org` (real)
-- `buzzheavier` (real, PolyUploader-orientiert)
-- `onefichier` (real, 1fichier.com)
+- `dailyuploads` (real, dailyuploads.net)
+- `megaup` (real, megaup.net)
 - `gofile` (real, gofile.io)
 - `send_now` (real, send.now)
 - `upload_ee` (real, upload.ee)
-- `vikingfile` (real, vikingfile.com)
 - `dummy_local` (fuer Demo/Tests)
 
 Beim `list`-Befehl werden Host-Tags aus PolyUploader-`profiles.json` angezeigt (z. B. `10GB+`, `60d+`, `<1d`, `delete`), falls fuer die Domain vorhanden.
@@ -72,28 +69,23 @@ surfload list
 ### Account anlegen (interaktiv)
 
 ```bash
-surfload account add fileio --interactive
-surfload account add transfer_sh --interactive
-surfload account add buzzheavier --interactive
+surfload account add dailyuploads --interactive
 surfload account add gofile --interactive
-surfload account add onefichier --interactive
-surfload account add vikingfile --interactive
+surfload account add megaup --interactive
 ```
-
-Hinweis zu `vikingfile`: hier wird der `user`-Wert (User-Hash) erwartet.
 
 ### Upload (mehrere Hoster parallel)
 
 ```bash
-surfload upload --host fileio,transfer.sh /pfad/datei.iso --parallel 3
+surfload upload --host gofile,megaup /pfad/datei.iso --parallel 3
 ```
 
 ### Upload mit Kompression
 
 ```bash
-surfload upload --host transfer.sh /pfad/ordner --compress zip --parallel 2
+surfload upload --host megaup /pfad/ordner --compress zip --parallel 2
 # Eigener Name + Passwort + Split in 1GB Teile
-surfload upload --host vikingfile /pfad/datei.mp4 \
+surfload upload --host dailyuploads /pfad/datei.mp4 \
   --compress 7z --archive-name release-2026 \
   --archive-password-prompt --archive-part-size 1GB
 ```
@@ -101,8 +93,8 @@ surfload upload --host vikingfile /pfad/datei.mp4 \
 ### JSON fuer Skripte
 
 ```bash
-surfload upload --host transfer.sh /pfad/datei.bin --json
-surfload upload --host transfer.sh /pfad/datei.bin --json-file result.json
+surfload upload --host gofile /pfad/datei.bin --json
+surfload upload --host gofile /pfad/datei.bin --json-file result.json
 ```
 
 ### Konfiguration
@@ -119,7 +111,7 @@ surfload config set chunk_size 2097152
 
 ```bash
 surfload upload [PATH ...] \
-  [--host fileio,transfer.sh] \
+  [--host gofile,megaup] \
   [--account host:account_name] \
   [--compress none|auto|zip|7z] \
   [--archive-name NAME] [--archive-password PASS|--archive-password-prompt] \
@@ -139,7 +131,7 @@ Archiv-Optionen:
 Hinweis: Passwortschutz und Splitting verwenden die `7z`-CLI (Paket `p7zip-full`).
 
 `resume_on_retry` kann auch in der Config gesetzt werden (Default: `true`).
-Host-seitig ist Resume fuer `dummy_local` umgesetzt und fuer `transfer_sh`, `buzzheavier` sowie `gofile` optional aktivierbar (`host_defaults.<host>.enable_resume: true`).
+Host-seitig ist Resume fuer `dummy_local` umgesetzt und fuer `gofile` optional aktivierbar (`host_defaults.<host>.enable_resume: true`).
 Fuer `gofile` wird zusaetzlich ein Probe-Endpoint fuer Offset-Lookup ueber `host_defaults.gofile.resume_probe_url_template` benoetigt.
 Alle anderen Hoster fallen sauber auf normale Retry-Uploads zurueck.
 
@@ -183,20 +175,8 @@ Runtime-Config liegt standardmaessig unter:
 
 Das Projekt nutzt PolyUploader-Muster als Vorlage fuer Host-Implementierungen (insb. Form-Felder und Endpunkte):
 
-- **transfer.sh** (aus `src/js/upload.js`, `case "transfer.sh"`):
-  - Methode: `PUT`
-  - Endpoint-Muster: `https://transfer.sh/<filename>`
-  - Direkte Link-Antwort als Text
-- **buzzheavier.com** (aus `src/js/upload.js`, `case "buzzheavier.com"`):
-  - Methode: `PUT`
-  - Endpoint-Muster: `https://w.buzzheavier.com/<parent>/<filename>`
-  - Optional `Authorization: Bearer ...`
-  - URL-Extraktion aus JSON (`data.id`, `url`, etc.)
-- **file.io**:
-  - Oeffentliche API per Multipart-POST
-  - Felder wie `maxDownloads`, `autoDelete`, `expires`
 - **Neue Multipart-Hoster**:
-  - `1fichier.com`, `gofile.io`, `send.now`, `upload.ee`, `vikingfile.com`
+  - `gofile.io`, `send.now`, `upload.ee`, `dailyuploads.net`, `megaup.net`
   - Endpunkte/Feldnamen sind per `host_defaults` konfigurierbar, damit API-Aenderungen leicht angepasst werden koennen.
 
 ## Plugin-API
@@ -267,16 +247,13 @@ src/surfload/
   core.py
   plugins/
     base.py
-    fileio.py
     catbox.py
     tmpfiles_org.py
-    transfer_sh.py
-    buzzheavier.py
-    onefichier.py
+    dailyuploads.py
+    megaup.py
     gofile.py
     send_now.py
     upload_ee.py
-    vikingfile.py
     dummy_local.py
   utils/
     credentials.py
