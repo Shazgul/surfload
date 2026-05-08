@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VENV_DIR="$REPO_DIR/.venv"
 TEST_FILE="${1:-/tmp/surfload-test.bin}"
-HOSTS="${SURFLOAD_HOSTS:-1fichier.com,gofile.io,send.now,upload.ee,vikingfile.com}"
+HOSTS="${SURFLOAD_HOSTS:-gofile.io,dailyuploads.net,fileq.net,upload.ee}"
 
 if [ ! -d "$VENV_DIR" ]; then
   echo "Fehler: Venv nicht gefunden: $VENV_DIR"
@@ -37,11 +37,10 @@ fi
 
 echo "[3/4] Optional: Accounts interaktiv hinterlegen"
 echo "    (nur wenn noch nicht gespeichert)"
-echo "    surfload account add onefichier --interactive"
+echo "    surfload account add dailyuploads --interactive"
+echo "    surfload account add fileq --interactive"
 echo "    surfload account add gofile --interactive"
-echo "    surfload account add send_now --interactive"
 echo "    surfload account add upload_ee --interactive"
-echo "    surfload account add vikingfile --interactive"
 
 echo "[4/4] Starte Real-Hoster-Testupload"
 echo "Hosts: $HOSTS"

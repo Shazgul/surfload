@@ -66,7 +66,6 @@ surfload account add dailyuploads --interactive
 surfload account add fileq --interactive
 surfload account add gofile --interactive
 surfload account add megaup --interactive
-surfload account add send_now --interactive
 surfload account add upload_ee --interactive
 ```
 
@@ -74,7 +73,7 @@ surfload account add upload_ee --interactive
 
 ```bash
 source ~/surfload/.venv/bin/activate
-surfload upload --host catbox,dailyuploads,fileq,gofile,megaup,send_now,tmpfiles_org,upload_ee /pfad/datei.bin --parallel 3 --no-progress
+surfload upload --host catbox,dailyuploads,fileq,gofile,megaup,tmpfiles_org,upload_ee /pfad/datei.bin --parallel 3 --no-progress
 ```
 
 ## 6) Realtest mit Split-Archiv + TXT/JSON Export
@@ -82,16 +81,19 @@ surfload upload --host catbox,dailyuploads,fileq,gofile,megaup,send_now,tmpfiles
 ```bash
 source ~/surfload/.venv/bin/activate
 surfload upload \
-  --host catbox,dailyuploads,fileq,gofile,megaup,send_now,tmpfiles_org,upload_ee \
+  --host catbox,dailyuploads,fileq,gofile,megaup,tmpfiles_org,upload_ee \
   /pfad/datei.bin \
   --compress 7z \
   --archive-name release_test \
   --archive-part-size 1GB \
+  --keep-temp \
   --parallel 2 \
   --no-progress \
   --export /tmp/surfload_results.txt \
   --json-file /tmp/surfload_results.json
 ```
+
+Mit `--keep-temp` bleiben die erzeugten Archive/Parts zur Kontrolle im Temp-Ordner (`/tmp/surfload_*`).
 
 ## 7) Nur TXT/JSON aus vorhandenem JSON neu erzeugen
 

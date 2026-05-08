@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
 import re
+from typing import Any, Dict, Optional
+from uuid import uuid4
 
+from ..utils.streaming import MultipartStream
 from .base import BaseHostPlugin, UploadError
 
 
@@ -34,11 +36,27 @@ class DailyUploadsPlugin(BaseHostPlugin):
         return f"{upload_base.rstrip('/')}/upload.cgi"
 
     def upload_file(self, stream: Any, size: int, metadata: Dict[str, Any]) -> Any:
+        _ = size
+        boundary = f"----SurfloadBoundary{uuid4().hex}"
         upload_url = self._resolve_upload_url()
-        files = {
-            "file_0": (metadata["filename"], stream, metadata["mime_type"]),
+
+        multipart = MultipartStream(
+            file_path=metadata["path"],
+            field_name="file_0",
+            filename=metadata["filename"],
+            mime_type=metadata["mime_type"],
+            form_data={},
+            boundary=boundary,
+            progress_callback=stream.progress_callback,
+            chunk_size=stream.chunk_size,
+        )
+
+        headers = {
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "Content-Length": str(len(multipart)),
         }
-        response = self._upload_request("POST", upload_url, files=files)
+
+        response = self._upload_request("POST", upload_url, data=multipart, headers=headers)
         if response.status_code >= 400:
             raise UploadError(f"dailyuploads upload failed ({response.status_code}): {response.text[:300]}")
 

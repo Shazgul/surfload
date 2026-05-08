@@ -202,6 +202,7 @@ def prepare_upload_paths(
     archive_name: str = "",
     archive_password: str = "",
     archive_part_size: str = "",
+    keep_temp: bool = False,
 ) -> Tuple[List[Path], Callable[[], None]]:
     normalized = [path.expanduser().resolve() for path in input_paths]
     for path in normalized:
@@ -216,6 +217,8 @@ def prepare_upload_paths(
     temp_dir = Path(tempfile.mkdtemp(prefix="surfload_"))
 
     def cleanup() -> None:
+        if keep_temp:
+            return
         shutil.rmtree(temp_dir, ignore_errors=True)
 
     if mode in {"none", "off", "false"}:

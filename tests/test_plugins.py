@@ -12,7 +12,6 @@ from surfload.plugins.dummy_local import DummyLocalPlugin
 from surfload.plugins.fileq import FileQPlugin
 from surfload.plugins.gofile import GofilePlugin
 from surfload.plugins.megaup import MegaupPlugin
-from surfload.plugins.send_now import SendNowPlugin
 from surfload.plugins.tmpfiles_org import TmpfilesOrgPlugin
 from surfload.plugins.upload_ee import UploadEePlugin
 
@@ -41,7 +40,7 @@ def test_plugin_registry_contains_extended_plugins() -> None:
     assert "fileq" in registry
     assert "megaup" in registry
     assert "gofile" in registry
-    assert "send_now" in registry
+    assert "send_now" not in registry
     assert "upload_ee" in registry
     assert "onecloudfile" not in registry
     assert "mega4upload" not in registry
@@ -154,11 +153,105 @@ def test_gofile_upload_sets_content_range_for_resume(tmp_path: Path) -> None:
     assert int(headers["Content-Length"]) == int(captured["body_len"])
 
 
-def test_send_now_finalize_parses_nested_link() -> None:
-    plugin = SendNowPlugin()
-    response = {"ok": True, "data": {"url": "https://send.now/abcde"}}
-    result = plugin.finalize(response, metadata={})
-    assert result == "https://send.now/abcde"
+def test_fileq_upload_streams_full_file_payload(tmp_path: Path) -> None:
+    payload = (b"A" * (1024 * 1024)) + (b"B" * (256 * 1024))
+    source = tmp_path / "fileq-large.bin"
+    source.write_bytes(payload)
+
+    plugin = FileQPlugin()
+    plugin.auth({"api_key": "demo"})
+    plugin._resolve_upload_session = lambda: ("https://example.invalid/upload", "sess-1")  # type: ignore[method-assign]
+
+    captured: dict[str, object] = {}
+
+    class Response:
+        status_code = 200
+
+        @staticmethod
+        def json() -> list[dict[str, str]]:
+            return [{"file_code": "demo"}]
+
+    def fake_upload_request(method: str, url: str, **kwargs):
+        _ = method
+        _ = url
+        captured["headers"] = kwargs.get("headers") or {}
+        body = kwargs.get("data")
+        captured["body"] = b"".join(iter(body)) if body is not None else b""
+        return Response()
+
+    plugin._upload_request = fake_upload_request  # type: ignore[method-assign]
+
+    class Stream:
+        progress_callback = None
+        chunk_size = 1024 * 1024
+
+    plugin.upload_file(
+        stream=Stream(),
+        size=len(payload),
+        metadata={
+            "path": source,
+            "filename": source.name,
+            "mime_type": "application/octet-stream",
+        },
+    )
+
+    body = captured["body"]
+    assert isinstance(body, (bytes, bytearray))
+    assert payload in body
+
+    headers = captured["headers"]
+    assert isinstance(headers, dict)
+    assert int(headers["Content-Length"]) == len(body)
+
+
+def test_dailyuploads_upload_streams_full_file_payload(tmp_path: Path) -> None:
+    payload = (b"X" * (1024 * 1024)) + (b"Y" * (128 * 1024))
+    source = tmp_path / "dailyuploads-large.bin"
+    source.write_bytes(payload)
+
+    plugin = DailyUploadsPlugin()
+    plugin._resolve_upload_url = lambda: "https://example.invalid/upload.cgi"  # type: ignore[method-assign]
+
+    captured: dict[str, object] = {}
+
+    class Response:
+        status_code = 200
+
+        @staticmethod
+        def json() -> dict[str, dict[str, str]]:
+            return {"data": {"id": "demo"}}
+
+    def fake_upload_request(method: str, url: str, **kwargs):
+        _ = method
+        _ = url
+        captured["headers"] = kwargs.get("headers") or {}
+        body = kwargs.get("data")
+        captured["body"] = b"".join(iter(body)) if body is not None else b""
+        return Response()
+
+    plugin._upload_request = fake_upload_request  # type: ignore[method-assign]
+
+    class Stream:
+        progress_callback = None
+        chunk_size = 1024 * 1024
+
+    plugin.upload_file(
+        stream=Stream(),
+        size=len(payload),
+        metadata={
+            "path": source,
+            "filename": source.name,
+            "mime_type": "application/octet-stream",
+        },
+    )
+
+    body = captured["body"]
+    assert isinstance(body, (bytes, bytearray))
+    assert payload in body
+
+    headers = captured["headers"]
+    assert isinstance(headers, dict)
+    assert int(headers["Content-Length"]) == len(body)
 
 
 def test_upload_ee_finalize_builds_default_link_from_code() -> None:

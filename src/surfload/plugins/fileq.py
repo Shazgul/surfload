@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import re
 from typing import Any, Dict
+from uuid import uuid4
 
+from ..utils.streaming import MultipartStream
 from .base import BaseHostPlugin, UploadError
 
 
@@ -41,6 +43,7 @@ class FileQPlugin(BaseHostPlugin):
 
     def upload_file(self, stream: Any, size: int, metadata: Dict[str, Any]) -> Any:
         _ = size
+        boundary = f"----SurfloadBoundary{uuid4().hex}"
         upload_url, sess_id = self._resolve_upload_session()
 
         form_data: Dict[str, str] = {
@@ -51,11 +54,23 @@ class FileQPlugin(BaseHostPlugin):
         if folder_id:
             form_data["fld_id"] = folder_id
 
-        files = {
-            "file_0": (metadata["filename"], stream, metadata["mime_type"]),
+        multipart = MultipartStream(
+            file_path=metadata["path"],
+            field_name="file_0",
+            filename=metadata["filename"],
+            mime_type=metadata["mime_type"],
+            form_data=form_data,
+            boundary=boundary,
+            progress_callback=stream.progress_callback,
+            chunk_size=stream.chunk_size,
+        )
+
+        headers = {
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "Content-Length": str(len(multipart)),
         }
 
-        response = self._upload_request("POST", upload_url, data=form_data, files=files)
+        response = self._upload_request("POST", upload_url, data=multipart, headers=headers)
         if response.status_code >= 400:
             raise UploadError(f"fileq upload failed ({response.status_code}): {response.text[:300]}")
 

@@ -12,7 +12,6 @@ from .dummy_local import DummyLocalPlugin
 from .fileq import FileQPlugin
 from .gofile import GofilePlugin
 from .megaup import MegaupPlugin
-from .send_now import SendNowPlugin
 from .tmpfiles_org import TmpfilesOrgPlugin
 from .upload_ee import UploadEePlugin
 
@@ -23,7 +22,6 @@ PROFILE_CAPABILITIES = {
         "gofile.io",
         "hitfile.net",
         "dailyuploads.net",
-        "send.now",
         "uploadhive.com",
         "dfiles.eu",
         "download.gg",
@@ -149,11 +147,6 @@ PLUGIN_REGISTRY: Dict[str, PluginDescriptor] = {
         key=GofilePlugin.host_key,
         cls=GofilePlugin,
         domain=GofilePlugin.domain,
-    ),
-    SendNowPlugin.host_key: PluginDescriptor(
-        key=SendNowPlugin.host_key,
-        cls=SendNowPlugin,
-        domain=SendNowPlugin.domain,
     ),
     UploadEePlugin.host_key: PluginDescriptor(
         key=UploadEePlugin.host_key,

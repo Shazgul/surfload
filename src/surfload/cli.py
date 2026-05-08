@@ -31,8 +31,6 @@ HOST_ALIASES = {
     "megaup": "megaup",
     "gofile.io": "gofile",
     "gofile": "gofile",
-    "send.now": "send_now",
-    "send_now": "send_now",
     "upload.ee": "upload_ee",
     "upload_ee": "upload_ee",
     "dummy-local": "dummy_local",
@@ -171,7 +169,11 @@ def cmd_upload(args) -> int:
         archive_name=args.archive_name or "",
         archive_password=archive_password,
         archive_part_size=args.archive_part_size or "",
+        keep_temp=bool(args.keep_temp),
     )
+
+    if bool(args.keep_temp) and compress_mode.lower().strip() not in {"none", "off", "false"} and upload_paths:
+        print(f"Temporäre Archivdateien bleiben erhalten unter: {upload_paths[0].parent}")
 
     try:
         resume_on_retry = args.resume_on_retry
@@ -607,6 +609,7 @@ def cmd_wizard(args) -> int:
                 archive_password="",
                 archive_password_prompt=False,
                 archive_part_size=archive_part_size,
+                keep_temp=False,
                 recursive=True,
                 json=False,
                 json_file=json_path,
@@ -672,6 +675,7 @@ def build_parser() -> argparse.ArgumentParser:
         default="",
         help="Archiv-Splitting pro Part, z.B. 500MB, 1GB, 1536MiB",
     )
+    upload.add_argument("--keep-temp", action="store_true", help="Temporäre Archive/Parts nach Upload nicht löschen")
     upload.add_argument("--recursive", action="store_true", help="Ordner rekursiv aufloesen")
     upload.add_argument("--json", action="store_true", help="JSON Ausgabe auf stdout")
     upload.add_argument("--json-file", default="", help="JSON Ausgabe in Datei schreiben")

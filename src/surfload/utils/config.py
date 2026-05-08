@@ -56,10 +56,6 @@ DEFAULT_CONFIG: Dict[str, Any] = {
             "enable_resume": False,
             "resume_probe_url_template": "",
         },
-        "send_now": {
-            "upload_url": "",
-            "homepage_url": "https://send.now/",
-        },
         "upload_ee": {
             "bootstrap_url": "",
             "upload_url_template": "https://www.upload.ee/cgi-bin/ubr_upload.pl?X-Progress-ID={upload_id}&upload_id={upload_id}",

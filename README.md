@@ -29,7 +29,6 @@ Aktuell enthalten:
 - `fileq` (real, fileq.net)
 - `megaup` (real, megaup.net)
 - `gofile` (real, gofile.io)
-- `send_now` (real, send.now)
 - `upload_ee` (real, upload.ee)
 - `dummy_local` (fuer Demo/Tests)
 
@@ -97,7 +96,7 @@ surfload upload --host megaup /pfad/ordner --compress zip --parallel 2
 # Eigener Name + Passwort + Split in 1GB Teile
 surfload upload --host dailyuploads /pfad/datei.mp4 \
   --compress 7z --archive-name release-2026 \
-  --archive-password-prompt --archive-part-size 1GB
+  --archive-password-prompt --archive-part-size 1GB --keep-temp
 ```
 
 ### JSON fuer Skripte
@@ -125,7 +124,7 @@ surfload upload [PATH ...] \
   [--account host:account_name] \
   [--compress none|auto|zip|7z] \
   [--archive-name NAME] [--archive-password PASS|--archive-password-prompt] \
-  [--archive-part-size SIZE] \
+  [--archive-part-size SIZE] [--keep-temp] \
   [--parallel N] [--chunk-size BYTES] [--retries N] \
   [--resume-on-retry|--no-resume-on-retry] \
   [--recursive] [--json] [--json-file PATH] [--export PATH]
@@ -137,6 +136,7 @@ Archiv-Optionen:
 - `--archive-password`: Passwort fuer `zip`/`7z` Archiv.
 - `--archive-password-prompt`: Passwort interaktiv eingeben (empfohlen, damit es nicht in Shell-History landet).
 - `--archive-part-size`: Split-Groesse pro Part, z. B. `500MB`, `1GB`, `1536MiB`.
+- `--keep-temp`: Temporäre Archivdateien/Parts nach dem Upload nicht löschen (Debug/Pruefung).
 
 Hinweis: Passwortschutz und Splitting verwenden die `7z`-CLI (Paket `p7zip-full`).
 
@@ -199,7 +199,7 @@ Runtime-Config liegt standardmaessig unter:
 Das Projekt nutzt PolyUploader-Muster als Vorlage fuer Host-Implementierungen (insb. Form-Felder und Endpunkte):
 
 - **Neue Multipart-Hoster**:
-  - `gofile.io`, `send.now`, `upload.ee`, `dailyuploads.net`, `fileq.net`, `megaup.net`
+  - `gofile.io`, `upload.ee`, `dailyuploads.net`, `fileq.net`, `megaup.net`
   - Endpunkte/Feldnamen sind per `host_defaults` konfigurierbar, damit API-Aenderungen leicht angepasst werden koennen.
 
 ## Plugin-API
@@ -276,7 +276,6 @@ src/surfload/
     fileq.py
     megaup.py
     gofile.py
-    send_now.py
     upload_ee.py
     dummy_local.py
   utils/
